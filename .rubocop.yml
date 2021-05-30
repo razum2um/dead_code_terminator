@@ -1,0 +1,36 @@
+AllCops:
+  TargetRubyVersion: 2.5
+  NewCops: enable
+
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Layout/LineLength:
+  Max: 120
+
+Layout/TrailingWhitespace:
+  Exclude:
+    - spec/**/*rb
+
+Lint/BooleanSymbol:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Lint/UnusedMethodArgument:
+  Enabled: false
