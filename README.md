@@ -27,8 +27,6 @@ So if you have hotfix patches from upstream - they'll be applied without conflic
 
 ## TODO
 
-- `unless`
-- `x ? a : b`
 - builtin file tree processing
 ## License
 

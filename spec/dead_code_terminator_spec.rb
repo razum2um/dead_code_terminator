@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
+# IMPORTANT!
+# please, enable whitespace showing, take care of expected heredoc contents,
+#         disable stripping lines in git/tools
+# note: despite line seems empty, spaces left before old `if` place:
+# - where, shifted by class/method nesting
+# - after `=` sign
 RSpec.describe DeadCodeTerminator do
   let(:env) { {} }
   let(:io) { "" }
   let(:subject) { described_class.strip(io, env: env) }
+
+  let(:then_branch_on_line_2_of_total_5_shift_by_2) { "\n  :then_branch\n\n\n\n" }
+  let(:else_branch_on_line_4_of_total_5_shift_by_2) { "\n\n\n  :else_branch\n\n" }
 
   describe "static truthty if branch" do
     let(:io) do
@@ -16,18 +25,8 @@ RSpec.describe DeadCodeTerminator do
       CODE
     end
 
-    let(:expected) do
-      <<~CODE
-        
-        :then_branch
-
-        
-
-      CODE
-    end
-
     it "preserves then-branch" do
-      expect(subject).to eq expected
+      expect(subject).to eq then_branch_on_line_2_of_total_5_shift_by_2
     end
   end
 
@@ -42,18 +41,8 @@ RSpec.describe DeadCodeTerminator do
       CODE
     end
 
-    let(:expected) do
-      <<~CODE
-        
-
-
-        :else_branch
-
-      CODE
-    end
-
     it "preserves else-branch" do
-      expect(subject).to eq expected
+      expect(subject).to eq else_branch_on_line_4_of_total_5_shift_by_2
     end
   end
 
@@ -70,13 +59,57 @@ RSpec.describe DeadCodeTerminator do
       CODE
     end
 
+    it "preserves then_branch" do
+      expect(subject).to eq then_branch_on_line_2_of_total_5_shift_by_2
+    end
+  end
+
+  describe "truthty if branch marked via ENV[] in brackets" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        if (ENV['PRODUCTION'])
+          :then_branch
+        else
+          :else_branch
+        end
+      CODE
+    end
+
+    it "preserves then_branch" do
+      expect(subject).to eq then_branch_on_line_2_of_total_5_shift_by_2
+    end
+  end
+
+  describe "truthty if branch marked via ENV[] shifted inside class and method" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        class X
+          def x
+            if ENV['PRODUCTION']
+              :then_branch
+            else
+              :else_branch
+            end
+          end
+        end
+      CODE
+    end
+
     let(:expected) do
       <<~CODE
-        
-        :then_branch
-
-        
-
+        class X
+          def x
+            
+              :then_branch
+      
+      
+      
+          end
+        end
       CODE
     end
 
@@ -98,18 +131,8 @@ RSpec.describe DeadCodeTerminator do
       CODE
     end
 
-    let(:expected) do
-      <<~CODE
-        
-        :then_branch
-
-        
-
-      CODE
-    end
-
     it "preserves then_branch" do
-      expect(subject).to eq expected
+      expect(subject).to eq then_branch_on_line_2_of_total_5_shift_by_2
     end
   end
 
@@ -133,12 +156,20 @@ RSpec.describe DeadCodeTerminator do
     let(:io) do
       <<~CODE
         class ENV
-          def if(arg)
-            if arg
+          def if(arg, arg2)
+            x = if arg
               :then_branch
             else
               :else_branch
             end
+
+            y = unless arg2
+              :then_branch_2
+            else
+              :else_branch_2
+            end
+
+            x ? x : y
           end
         end
       CODE
@@ -146,6 +177,146 @@ RSpec.describe DeadCodeTerminator do
 
     it "dosn't touch anything" do
       expect(subject).to eq io
+    end
+  end
+
+  describe "truthty if branch marked via ENV[] and used as value" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        value = if ENV['PRODUCTION']
+          :then_branch
+        else
+          :else_branch
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        value = 
+          :then_branch
+
+        
+
+      CODE
+    end
+
+    it "preserves then_branch" do
+      expect(subject).to eq expected
+    end
+  end
+
+  describe "truthty if branch marked via ENV[] and used as value after unless" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        value = unless ENV['PRODUCTION']
+          :then_branch
+        else
+          :else_branch
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        value = 
+        
+
+          :else_branch
+
+      CODE
+    end
+
+    it "preserves else_branch" do
+      expect(subject).to eq expected
+    end
+  end
+
+  describe "multiple sequential branches" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        class X
+          def x
+            value = if ENV['PRODUCTION']
+              :then_branch
+            else
+              :else_branch
+            end
+            value2 = unless ENV['PRODUCTION']
+              :then_branch
+            else
+              :else_branch
+            end
+            [value, value2]
+          end
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        class X
+          def x
+            value = 
+              :then_branch
+        
+        
+        
+            value2 = 
+        
+        
+              :else_branch
+        
+            [value, value2]
+          end
+        end
+      CODE
+    end
+
+    it "preserves top-level branch" do
+      expect(subject).to eq expected
+    end
+  end
+
+  describe "multiple nested branches" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        value = if ENV['PRODUCTION']
+          :then_branch
+        else
+          value2 = if ENV['PRODUCTION']
+            :then_branch
+          else
+            :else_branch
+          end
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        value = 
+          :then_branch
+        
+        
+        
+        
+        
+        
+        
+      CODE
+    end
+
+    it "preserves only top-level branch" do
+      expect(subject).to eq expected
     end
   end
 end
