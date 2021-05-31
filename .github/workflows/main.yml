@@ -14,3 +14,6 @@ jobs:
         bundler-cache: true
     - name: Run the default task
       run: bundle exec rake
+      env:
+        CI: true
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

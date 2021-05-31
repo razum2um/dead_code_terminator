@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+require "simplecov"
+SimpleCov.start
+
+if ENV["CI"] && ENV["CODECOV_TOKEN"]
+  require "codecov"
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
 require "dead_code_terminator"
 require "pry-byebug" unless ENV["CI"]
 

@@ -13,4 +13,7 @@ gem "rubocop", "~> 1.7"
 gem "rubocop-rake", "~> 0.5"
 gem "rubocop-rspec", "~> 2.3"
 
+gem "codecov", require: false
+gem "simplecov", "~> 0.21"
+
 gem "pry-byebug" unless ENV["CI"]
