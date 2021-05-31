@@ -56,4 +56,60 @@ RSpec.describe DeadCodeTerminator do
       expect(subject).to eq expected
     end
   end
+
+  describe "truthty if branch marked via ENV[]" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        if ENV['PRODUCTION']
+          :then_branch
+        else
+          :else_branch
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        
+        :then_branch
+
+        
+
+      CODE
+    end
+
+    it "preserves else-branch" do
+      expect(subject).to eq expected
+    end
+  end
+
+  describe "truthty if branch marked via ENV.fetch()" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        if ENV.fetch('PRODUCTION')
+          :then_branch
+        else
+          :else_branch
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        
+        :then_branch
+
+        
+
+      CODE
+    end
+
+    it "preserves else-branch" do
+      expect(subject).to eq expected
+    end
+  end
 end
