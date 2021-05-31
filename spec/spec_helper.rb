@@ -9,7 +9,21 @@ if ENV["CI"] && ENV["CODECOV_TOKEN"]
 end
 
 require "dead_code_terminator"
+require "parser/current"
 require "pry-byebug" unless ENV["CI"]
+
+RSpec::Matchers.define :be_valid_ruby_code do
+  match do |str|
+    Parser::CurrentRuby.parse(str)
+    true
+  rescue Parser::SyntaxError
+    false
+  end
+
+  failure_message do |str|
+    "Expected #{str.inspect} to be valid Ruby code"
+  end
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
