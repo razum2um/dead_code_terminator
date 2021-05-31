@@ -31,12 +31,15 @@ value =
 
 
     ENV['RUNTIME'] ? :else1 : :else2
+
+ 
 ```
 
 Note: it keeps *precise* code locations (including whitespaces and line-breaks).
 So if you have hotfix patches from upstream - they'll be applied without conflicts.
+Backtrace line numbers are also preserved and can point to original code.
 
-Other example can be found in [specs](https://github.com/razum2um/dead_code_terminator/blob/master/spec/dead_code_terminator_spec.rb)
+Other examples can be found in [specs](https://github.com/razum2um/dead_code_terminator/blob/master/spec/dead_code_terminator_spec.rb)
 
 ## TODO
 
