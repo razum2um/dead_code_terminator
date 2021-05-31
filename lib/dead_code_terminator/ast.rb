@@ -70,6 +70,8 @@ module DeadCodeTerminator
 
     # :(
     def count_spaces_before_first_line_of_static_if_branch
+      return 0 if total_lines == 1
+
       (begin_pos - 1).downto(0).take_while do |pos|
         line_for_position_of_static_if_branch(pos) == from_line
       end.size

@@ -68,6 +68,34 @@ RSpec.describe DeadCodeTerminator do
     end
   end
 
+  describe "falsy if branch marked via ENV[] written with ternary operator" do
+    let(:env) { { "PRODUCTION" => false } }
+
+    let(:io) do
+      <<~CODE
+        ENV['PRODUCTION'] ? :then_branch : :else_branch
+      CODE
+    end
+
+    it "preserves then_branch" do
+      expect(subject).to eq ":else_branch\n"
+    end
+  end
+
+  describe "truthty if branch marked via ENV[] written with ternary operator returning expression" do
+    let(:env) { { "PRODUCTION" => true } }
+
+    let(:io) do
+      <<~CODE
+        x = ENV['PRODUCTION'] ? :then_branch : :else_branch
+      CODE
+    end
+
+    it "preserves then_branch" do
+      expect(subject).to eq "x = :then_branch\n"
+    end
+  end
+
   describe "truthty if branch marked via ENV[] in brackets" do
     let(:env) { { "PRODUCTION" => true } }
 
