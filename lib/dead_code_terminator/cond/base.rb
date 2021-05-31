@@ -3,6 +3,8 @@
 module DeadCodeTerminator
   module Cond
     class Base
+      include ::AST::Sexp
+
       THEN = :then
       ELSE = :else
 
@@ -14,12 +16,6 @@ module DeadCodeTerminator
       end
 
       def value; end
-
-      private
-
-      def s(type, *children)
-        Parser::AST::Node.new(type, children)
-      end
     end
   end
 end
