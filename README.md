@@ -7,23 +7,36 @@
 This acts like [webpack's DefinePlugin](https://webpack.js.org/plugins/define-plugin/) with minification pass. It allows to eliminate dead code statically, which can be required by regulations.
 
 ```ruby
-if ENV['PRODUCTION']
-    :then_branch
+value = if ENV['FLAG']
+  :then_branch
 else
-    :else_branch
+  value2 = unless ENV['PRODUCTION']
+    :then_branch
+  else
+    ENV['RUNTIME'] ? :else1 : :else2
+  end
 end
 ```
 
 ```ruby
-  
-    :then_branch
+# returns a valid ruby code string back with statically evaluated conditions
+DeadCodeTerminator.strip(string, env: { "PRODUCTION" => true, "FLAG" => false })
+```
 
-        
+```ruby
+value = 
 
+
+  value2 = 
+
+
+    ENV['RUNTIME'] ? :else1 : :else2
 ```
 
 Note: it keeps *precise* code locations (including whitespaces and line-breaks).
 So if you have hotfix patches from upstream - they'll be applied without conflicts.
+
+Other example can be found in [specs](https://github.com/razum2um/dead_code_terminator/blob/master/spec/dead_code_terminator_spec.rb)
 
 ## TODO
 

@@ -332,10 +332,10 @@ RSpec.describe DeadCodeTerminator do
         value = if ENV['FLAG']
           :then_branch
         else
-          value2 = if ENV['PRODUCTION']
+          value2 = unless ENV['PRODUCTION']
             :then_branch
           else
-            :else_branch
+            ENV['RUNTIME'] ? :else1 : :else2
           end
         end
       CODE
@@ -347,9 +347,9 @@ RSpec.describe DeadCodeTerminator do
 
 
           value2 = 
-            :then_branch
         
         
+            ENV['RUNTIME'] ? :else1 : :else2
         
         
       CODE
