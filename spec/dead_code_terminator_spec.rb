@@ -14,6 +14,10 @@ RSpec.describe DeadCodeTerminator do
   let(:then_branch_on_line_2_of_total_5_shift_by_2) { "\n  :then_branch\n\n\n\n" }
   let(:else_branch_on_line_4_of_total_5_shift_by_2) { "\n\n\n  :else_branch\n\n" }
 
+  before do
+    expect(subject).to be_valid_ruby_code
+  end
+
   describe "static truthty if branch" do
     let(:io) do
       <<~CODE
@@ -284,7 +288,7 @@ RSpec.describe DeadCodeTerminator do
     end
   end
 
-  describe "multiple nested branches" do
+  describe "multiple nested branches with same env" do
     let(:env) { { "PRODUCTION" => true } }
 
     let(:io) do
@@ -305,9 +309,45 @@ RSpec.describe DeadCodeTerminator do
       <<~CODE
         value = 
           :then_branch
+
+
         
         
         
+        
+        
+      CODE
+    end
+
+    it "preserves only top-level branch" do
+      expect(subject).to eq expected
+    end
+  end
+
+  describe "multiple nested branches with different keys" do
+    let(:env) { { "PRODUCTION" => true, "FLAG" => false } }
+
+    let(:io) do
+      <<~CODE
+        value = if ENV['FLAG']
+          :then_branch
+        else
+          value2 = if ENV['PRODUCTION']
+            :then_branch
+          else
+            :else_branch
+          end
+        end
+      CODE
+    end
+
+    let(:expected) do
+      <<~CODE
+        value = 
+
+
+          value2 = 
+            :then_branch
         
         
         
