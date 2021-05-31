@@ -80,7 +80,7 @@ RSpec.describe DeadCodeTerminator do
       CODE
     end
 
-    it "preserves else-branch" do
+    it "preserves then_branch" do
       expect(subject).to eq expected
     end
   end
@@ -108,8 +108,44 @@ RSpec.describe DeadCodeTerminator do
       CODE
     end
 
-    it "preserves else-branch" do
+    it "preserves then_branch" do
       expect(subject).to eq expected
+    end
+  end
+
+  describe "if branch marked via ENV[] not present in env" do
+    let(:io) do
+      <<~CODE
+        if ENV['PRODUCTION']
+          :then_branch
+        else
+          :else_branch
+        end
+      CODE
+    end
+
+    it "dosn't touch code" do
+      expect(subject).to eq io
+    end
+  end
+
+  describe "arbitrary code" do
+    let(:io) do
+      <<~CODE
+        class ENV
+          def if(arg)
+            if arg
+              :then_branch
+            else
+              :else_branch
+            end
+          end
+        end
+      CODE
+    end
+
+    it "dosn't touch anything" do
+      expect(subject).to eq io
     end
   end
 end

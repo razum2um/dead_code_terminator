@@ -53,11 +53,7 @@ module DeadCodeTerminator
       @rewriter ||= Parser::Source::TreeRewriter.new(buf)
     end
 
-    def range(from, len = nil)
-      unless len
-        len = from.end - from.begin
-        from = from.begin
-      end
+    def range(from, len)
       Parser::Source::Range.new(buf, from, from + len)
     end
 
@@ -81,6 +77,8 @@ module DeadCodeTerminator
           return else_branch if value == Cond::Base::ELSE
         end
       end
+
+      ast
     end
   end
 end
